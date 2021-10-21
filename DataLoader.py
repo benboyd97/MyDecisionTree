@@ -2,19 +2,17 @@ import numpy as np
 from numpy.random import default_rng
 
 class DataLoader:
-    def __init__(self, location):
-        self.location = location
+    def __init__(self, path):
+        self.path = path
     
     def load_data(self):
-
-        dataset = np.loadtxt(self.location)
+        dataset = np.loadtxt(self.path)
         x = dataset[:, :-1]
         y = dataset[:, -1]
 
         return x, y
 
-    def split_dataset(self, x, y, test_proportion, random_generator=default_rng()):
-        
+    def split_dataset(self, x, y, test_proportion, random_generator=default_rng()):      
         shuffled_indicies = random_generator.permutation(len(x))
         n_test = round(len(x) * test_proportion)
         n_train = len(x) - n_test
