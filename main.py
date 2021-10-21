@@ -1,5 +1,6 @@
 from DecisionTreeClassifier import DecisionTreeClassifier
 from DataLoader import DataLoader
+import json
 
 # Load and split dataset
 data_loader = DataLoader("wifi_db/clean_dataset.txt")
@@ -9,6 +10,8 @@ x_train, x_test, y_train, y_test = data_loader.split_dataset(x, y, 0.2)
 # Train Decision Tree
 decision_tree = DecisionTreeClassifier()
 decision_tree.fit(x_train, y_train)
+
+#print(json.dumps(decision_tree.root, indent=4))
 
 # Test Decision Tree
 y_preds = decision_tree.predict(x_test)

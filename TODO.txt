@@ -1,0 +1,7 @@
+TODO:
+
+- pruning (Ryan)
+- eliminate unnecesary split checks + README + report  (Cornelius)
+- refactoring + visualisation (Shayaan)
+- evaluation (Ben)
+- 

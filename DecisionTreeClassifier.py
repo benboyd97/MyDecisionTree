@@ -16,7 +16,7 @@ class DecisionTreeClassifier:
         for sample in x:
             node = self.root
             while node["left"] and node["right"]:
-                if sample[node["attribute"]] < node["value"]:
+                if sample[node["attribute"]] <= node["value"]:
                     node = node["left"]
                 else:
                     node = node["right"]
@@ -24,64 +24,41 @@ class DecisionTreeClassifier:
         
         return y
 
-    def calculate_entropy(self, y):
+    def get_entropy(self, data: np.array):
+        label_values, label_counts = np.unique(data[:,-1], return_counts=True)
+        H = -np.sum((label_counts/data.shape[0])*np.log2(label_counts/data.shape[0]))
+        return H
 
-        counts = [0]*4
-        total = len(y)
-
-        for sample in y:
-            counts[int(sample)-1] += 1
-
-        entropy = 0
-        for label in range(4):
-            if counts[label] != 0:
-                p_label = counts[label]/total
-                entropy -= (p_label * math.log2(p_label))
-
-        return entropy
-
-    def find_split(self, x, y):
-        # choose the attribute and value that results in the highest information gain
-
-        total_entropy = self.calculate_entropy(y)
-        data_samples = np.c_[x, y]
+    def find_split(self, data: np.array):
+        H_all = self.get_entropy(data)
+        #print("H", H_all)
+        split_node = {"attribute":-1, "value":-1, "left":np.zeros(1), "right":np.zeros(1), "entropy_gain":-1}
         
-        best_gain = 0
-        best_split_val = None
-        best_split_attrib = None
-        l_data_x = None
-        l_data_y = None
-        r_data_x = None
-        r_data_y = None
-        
-        for attrib in range(x.shape[1]):
-
-            # sort data according to attribute in question
-            sorted_attrib = data_samples[np.argsort(data_samples[:,attrib])]
-
-            for sample in range(1, len(sorted_attrib)):
-                if sorted_attrib[sample][-1] !=  sorted_attrib[sample-1][-1]:
-                    split_value = (sorted_attrib[sample][attrib] + sorted_attrib[sample-1][attrib]) / 2
+        # columns represent features
+        for i, attribute in enumerate(data[:,:-1].T):
+            # TODO: eliminate the split points for equal neighbours
+            splits = np.sort(attribute)[:-1] + (np.diff(np.sort(attribute)) / 2)
+            
+            # go over each possible split value
+            for split in splits:
+                H_gain = H_all
+                left = data[np.where(data[:,i] <= split)]
+                right = data[np.where(data[:,i] > split)]
+                H_gain += -(left.shape[0]*self.get_entropy(left)+right.shape[0]*self.get_entropy(right)) / attribute.shape[0]
+                
+                # check for information gain
+                if H_gain > split_node["entropy_gain"]:
+                    split_node["attribute"] = i
+                    split_node["value"] = split
+                    split_node["left"] = left
+                    split_node["right"] = right
+                    split_node["entropy_gain"] = H_gain
                     
-                    # split on attrib with val split_val
-                    remainder_l = ((sample)/len(sorted_attrib)) * self.calculate_entropy(sorted_attrib[:sample][:, -1])
-                    remainder_r = ((len(sorted_attrib)-sample)/len(sorted_attrib)) * self.calculate_entropy(sorted_attrib[sample:][:, -1])
-                    gain = total_entropy - (remainder_l + remainder_r)
+        return split_node
 
-                    if gain > best_gain:
-                        best_gain = gain
-                        best_split_val = split_value
-                        best_split_attrib = attrib
-                        l_data_x = sorted_attrib[:sample][:, :-1]
-                        l_data_y = sorted_attrib[:sample][:, -1]
-                        r_data_x = sorted_attrib[sample:][:, :-1]
-                        r_data_y = sorted_attrib[sample:][:, -1]
-
-        return best_split_val, best_split_attrib, l_data_x, l_data_y, r_data_x, r_data_y
 
 
     def decision_tree_learning(self, x, y, depth):
-        
         if all(i==y[0] for i in y):
             return {"attribute": None, "value": y[0], "left": None, "right": None}, depth
         else:
@@ -92,5 +69,18 @@ class DecisionTreeClassifier:
             node["left"] = l_node
             r_node, r_depth = self.decision_tree_learning(r_data_x, r_data_y, depth+1)
             node["right"] = r_node
+
+            return node, max(l_depth, r_depth)
+
+    def decision_tree_learning(self, x: np.array, y:np.array, depth: int):
+        if len(np.unique(y)) == 1:
+            leaf_node = {"attribute": None, "value": y[0], "left":None, "right":None, "leaf":True}
+            return leaf_node, depth
+        else:
+            data = np.c_[x,y]
+            split = self.find_split(data)
+            l_branch, l_depth = self.decision_tree_learning(split["left"][:,:-1], split["left"][:,-1], depth+1)
+            r_branch, r_depth = self.decision_tree_learning(split["right"][:,:-1], split["right"][:,-1], depth+1)        
+            node = {"attribute":split["attribute"], "value":split["value"], "left":l_branch, "right":r_branch, "leaf":False}
 
             return node, max(l_depth, r_depth)
