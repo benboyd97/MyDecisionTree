@@ -33,8 +33,8 @@ class DecisionTreeClassifier:
         H_all = self.get_entropy(data)
         # Iterate over each attribute
         for i, attribute in enumerate(data[:,:-1].T):
-            # TODO: eliminate the split points for equal neighbours
-            splits = np.sort(attribute)[:-1] + (np.diff(np.sort(attribute)) / 2)
+            label_values = np.unique(np.sort(attribute))                # sort the labels and duplicates
+            splits = label_values[:-1] + (np.diff(label_values) / 2)    # create split points from distances between the values
             
             # Test each split value
             for split in splits:
