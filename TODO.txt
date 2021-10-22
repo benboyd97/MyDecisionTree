@@ -1,7 +1,7 @@
 TODO:
 
 - pruning (Ryan)
-- eliminate unnecesary split checks + README + report  (Cornelius)
+- README + report + add interface to specify split ratio and k for validation maybe (Cornelius)
 - refactoring + visualisation (Shayaan)
 - evaluation (Ben)
 - 
