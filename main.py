@@ -3,7 +3,7 @@ from DataLoader import DataLoader
 import numpy as np
 
 # Load the dataset
-data_loader = DataLoader("wifi_db/clean_dataset.txt")
+data_loader = DataLoader("wifi_db/noisy_dataset.txt")
 x, y = data_loader.load_data()
 
 repeat_count = 5

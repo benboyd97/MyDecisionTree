@@ -32,28 +32,45 @@ class DecisionTreeClassifier:
         
         H_all = self.get_entropy(data)
         # Iterate over each attribute
-        for i, attribute in enumerate(data[:,:-1].T):
-            label_values = np.unique(np.sort(attribute))                # sort the labels and duplicates
-            splits = label_values[:-1] + (np.diff(label_values) / 2)    # create split points from distances between the values
-            
-            # Test each split value
-            for split in splits:
-                # Segment the data according to the split
-                left = data[np.where(data[:,i] <= split)]
-                right = data[np.where(data[:,i] > split)]
 
-                # Calculate the entropy gain
-                remainder_left = left.shape[0]*self.get_entropy(left)
-                remainder_right = right.shape[0]*self.get_entropy(right)
-                gain = H_all - ((remainder_left + remainder_right) / attribute.shape[0])
-                
-                # If the entropy gain is higher then use this split
-                if gain > split_node["entropy_gain"]:
-                    split_node["attribute"] = i
-                    split_node["value"] = split
-                    split_node["left"] = left
-                    split_node["right"] = right
-                    split_node["entropy_gain"] = gain
+        y=np.array(data[:,-1])
+
+
+
+        for i, attribute in enumerate(data[:,:-1].T):
+
+            attribute_values = np.sort(attribute) #sorting attributes
+            y_sort=y[np.argsort(attribute)]   #sorting labels in the same order as attributes
+
+            attribute_values,unique_arg = np.unique(attribute_values,return_index=True) #unique attributes
+            y_values=y_sort[unique_arg] #corresponding labels
+            
+
+
+            splits = attribute_values[:-1] + (np.diff(attribute_values) / 2)    # create split points from distances between the values
+
+            # Test each split value
+
+            for j, split in enumerate(splits):
+
+                if y_values[j]-y_values[j+1]!=100:
+
+
+                    # Segment the data according to the split
+                    left = data[np.where(data[:,i] <= split)]
+                    right = data[np.where(data[:,i] > split)]
+
+                    # Calculate the entropy gain
+                    remainder_left = left.shape[0]*self.get_entropy(left)
+                    remainder_right = right.shape[0]*self.get_entropy(right)
+                    gain = H_all - ((remainder_left + remainder_right) / attribute.shape[0])
+                    # If the entropy gain is higher then use this split
+                    if gain > split_node["entropy_gain"]:
+                        split_node["attribute"] = i
+                        split_node["value"] = split
+                        split_node["left"] = left
+                        split_node["right"]= right
+
         return split_node
 
     def decision_tree_learning(self, x:np.array, y:np.array, depth:int):
@@ -65,7 +82,10 @@ class DecisionTreeClassifier:
         # Split the set according to the attribute the gives the greatest information gain
         data = np.c_[x,y]
         split = self.find_split(data)
+
+
         l_branch, l_depth = self.decision_tree_learning(split["left"][:,:-1], split["left"][:,-1], depth+1)
-        r_branch, r_depth = self.decision_tree_learning(split["right"][:,:-1], split["right"][:,-1], depth+1)        
+        r_branch, r_depth = self.decision_tree_learning(split["right"][:,:-1], split["right"][:,-1], depth+1) 
+
         node = {"attribute":split["attribute"], "value":split["value"], "left":l_branch, "right":r_branch, "leaf":False}
         return node, max(l_depth, r_depth)
