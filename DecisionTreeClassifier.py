@@ -79,12 +79,6 @@ class DecisionTreeClassifier:
         data = np.c_[x,y]
         split = self.find_split(data)
 
-
-        if split['attribute'] == -1:
-            leaf_node = {"attribute": None, "value": y[0], "left":None, "right":None, "leaf":True}
-            return leaf_node, depth
-
-
         l_branch, l_depth = self.decision_tree_learning(split["left"][:,:-1], split["left"][:,-1], depth+1)
         r_branch, r_depth = self.decision_tree_learning(split["right"][:,:-1], split["right"][:,-1], depth+1) 
 
