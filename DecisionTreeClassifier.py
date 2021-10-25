@@ -53,7 +53,7 @@ class DecisionTreeClassifier:
 
             for j, split in enumerate(splits):
 
-                if y_values[j]-y_values[j+1]!=100:
+                if y_values[j]-y_values[j+1]!=0:
 
 
                     # Segment the data according to the split
@@ -70,6 +70,7 @@ class DecisionTreeClassifier:
                         split_node["value"] = split
                         split_node["left"] = left
                         split_node["right"]= right
+                        split_node["entropy_gain"] = gain
 
         return split_node
 
@@ -82,6 +83,11 @@ class DecisionTreeClassifier:
         # Split the set according to the attribute the gives the greatest information gain
         data = np.c_[x,y]
         split = self.find_split(data)
+
+
+        if split['attribute'] == -1:
+            leaf_node = {"attribute": None, "value": y[0], "left":None, "right":None, "leaf":True}
+            return leaf_node, depth
 
 
         l_branch, l_depth = self.decision_tree_learning(split["left"][:,:-1], split["left"][:,-1], depth+1)
