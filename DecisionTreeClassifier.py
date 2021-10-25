@@ -42,18 +42,13 @@ class DecisionTreeClassifier:
             attribute_values = np.sort(attribute) #sorting attributes
             y_sort=y[np.argsort(attribute)]   #sorting labels in the same order as attributes
 
-            attribute_values,unique_arg = np.unique(attribute_values,return_index=True) #unique attributes
-            y_values=y_sort[unique_arg] #corresponding labels
-            
-
-
             splits = attribute_values[:-1] + (np.diff(attribute_values) / 2)    # create split points from distances between the values
 
             # Test each split value
 
             for j, split in enumerate(splits):
 
-                if y_values[j]-y_values[j+1]!=0:
+                if y_sort[j]-y_sort[j+1]!=0:
 
 
                     # Segment the data according to the split
