@@ -12,15 +12,19 @@ class DataLoader:
 
         return x, y
 
-    def split_dataset(self, x, y, test_proportion, random_generator=default_rng()):      
+    def split_dataset(self, x, y, test_proportion, val_proportion, random_generator=default_rng()):      
         shuffled_indicies = random_generator.permutation(len(x))
         n_test = round(len(x) * test_proportion)
-        n_train = len(x) - n_test
+        n_val = round(len(x) * val_proportion)
+        n_train = len(x) - n_test - n_val
 
         x_train = x[shuffled_indicies[:n_train]]
         y_train = y[shuffled_indicies[:n_train]]
 
-        x_test = x[shuffled_indicies[n_train:]]
-        y_test = y[shuffled_indicies[n_train:]]
+        x_test = x[shuffled_indicies[n_train:n_train+n_test]]
+        y_test = y[shuffled_indicies[n_train:n_train+n_test]]
 
-        return x_train, x_test, y_train, y_test
+        x_val = x[shuffled_indicies[n_train+n_test:]]
+        y_val = y[shuffled_indicies[n_train+n_test:]]
+
+        return x_train, x_test, x_val, y_train, y_test, y_val
