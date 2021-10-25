@@ -9,6 +9,75 @@ class DecisionTreeClassifier:
     def fit(self, x, y):
         self.root, self.depth = self.decision_tree_learning(x, y, 0)
 
+    # Prune the created decision tree
+    def prune(self, x_train, y_train, x_val, y_val):
+        
+        # Tree not yet created
+        if not self.root:
+            return None
+        
+        self.prune_traverse(self.root, x_train, y_train, x_val, y_val)
+
+        
+    def prune_traverse(self, node, x_train, y_train, x_val, y_val):
+        if node["leaf"]:
+            return
+
+        if node["left"]["leaf"] and node["right"]["leaf"]:
+
+            # cannot verify if validation error is reduced if there is no validation samples
+            if len(y_val) == 0:
+                return
+
+            _, label_counts = np.unique(y_train, return_counts=True)
+            majority_label = np.argmax(label_counts) + 1
+
+            if (self.validation_error(np.full(len(y_val), majority_label), y_val) < 
+                self.validation_error(self.predict(x_val), y_val)):
+
+                node["attribute"] = None
+                node["value"] = majority_label
+                node["left"] = None
+                node["right"] = None
+                node["leaf"] = True
+        
+        else:
+
+            # split train set
+            l_train_idxs = []
+            r_train_idxs = []
+            for i, sample in enumerate(x_train):
+                if sample[node["attribute"]] <= node["value"]:
+                    l_train_idxs.append(i)
+                else:
+                    r_train_idxs.append(i)
+            
+            x_train_l = x_train[l_train_idxs]
+            y_train_l = y_train[l_train_idxs]
+            x_train_r = x_train[r_train_idxs]
+            y_train_r = y_train[r_train_idxs]
+
+            # split val set
+            l_val_idxs = []
+            r_val_idxs = []
+            for i, sample in enumerate(x_val):
+                if sample[node["attribute"]] <= node["value"]:
+                    l_val_idxs.append(i)
+                else:
+                    r_val_idxs.append(i)
+            
+            x_val_l = x_val[l_val_idxs]
+            y_val_l = y_val[l_val_idxs]
+            x_val_r = x_val[r_val_idxs]
+            y_val_r = y_val[r_val_idxs]
+
+            self.prune_traverse(node["left"], x_train_l, y_train_l, x_val_l, y_val_l)
+            self.prune_traverse(node["right"], x_train_r, y_train_r, x_val_r, y_val_r)
+
+    # TODO: Move validtion error to evaluation class
+    def validation_error(self, preds, ys):
+        return np.count_nonzero(preds != ys) / ys.shape[0]
+
     # Make predictions for the sample by traversing the decision tree
     def predict(self, x):
         predictions = []
