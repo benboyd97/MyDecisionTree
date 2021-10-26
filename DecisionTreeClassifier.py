@@ -16,18 +16,18 @@ class DecisionTreeClassifier:
         if not self.root:
             return None
         
-        self.prune_traverse(self.root, x_train, y_train, x_val, y_val)
+        while self.prune_traverse(self.root, x_train, y_train, x_val, y_val): pass
 
         
     def prune_traverse(self, node, x_train, y_train, x_val, y_val):
         if node["leaf"]:
-            return
+            return False
 
         if node["left"]["leaf"] and node["right"]["leaf"]:
 
             # cannot verify if validation error is reduced if there is no validation samples
             if len(y_val) == 0:
-                return
+                return False
 
             _, label_counts = np.unique(y_train, return_counts=True)
             majority_label = np.argmax(label_counts) + 1
@@ -40,6 +40,8 @@ class DecisionTreeClassifier:
                 node["left"] = None
                 node["right"] = None
                 node["leaf"] = True
+
+                return True
         
         else:
 
@@ -71,8 +73,8 @@ class DecisionTreeClassifier:
             x_val_r = x_val[r_val_idxs]
             y_val_r = y_val[r_val_idxs]
 
-            self.prune_traverse(node["left"], x_train_l, y_train_l, x_val_l, y_val_l)
-            self.prune_traverse(node["right"], x_train_r, y_train_r, x_val_r, y_val_r)
+            return (self.prune_traverse(node["left"], x_train_l, y_train_l, x_val_l, y_val_l) or
+                self.prune_traverse(node["right"], x_train_r, y_train_r, x_val_r, y_val_r))
 
     # TODO: Move validtion error to evaluation class
     def validation_error(self, preds, ys):
