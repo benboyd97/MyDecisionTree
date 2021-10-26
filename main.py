@@ -14,7 +14,7 @@ accuracy2 = np.zeros(repeat_count)
 for i in range(repeat_count):
 
     # Split the dataset
-    x_train, x_test, x_val, y_train, y_test, y_val = data_loader.split_dataset(x, y, 0.2, 0.2)
+    x_train, x_test, x_val, y_train, y_test, y_val = data_loader.split_dataset(x, y, 0.1, 0.1)
 
     # Train Decision Tree
     decision_tree = DecisionTreeClassifier()
