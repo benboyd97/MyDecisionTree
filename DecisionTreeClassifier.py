@@ -1,10 +1,14 @@
 import numpy as np
+from Evaluation import Evaluation
+
 
 class DecisionTreeClassifier:
     def __init__(self):
         self.root = None
         self.depth = 0
-    
+        evaluation=Evaluation()
+        self.validation_error=evaluation.validation_error
+
     # Create the decision tree
     def fit(self, x, y):
         self.root, self.depth = self.decision_tree_learning(x, y, 0)
@@ -75,10 +79,6 @@ class DecisionTreeClassifier:
 
             return (self.prune_traverse(node["left"], x_train_l, y_train_l, x_val_l, y_val_l) or
                 self.prune_traverse(node["right"], x_train_r, y_train_r, x_val_r, y_val_r))
-
-    # TODO: Move validtion error to evaluation class
-    def validation_error(self, preds, ys):
-        return np.count_nonzero(preds != ys) / ys.shape[0]
 
     # Make predictions for the sample by traversing the decision tree
     def predict(self, x):

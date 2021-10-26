@@ -1,31 +1,52 @@
 from DecisionTreeClassifier import DecisionTreeClassifier
 from DataLoader import DataLoader
 import numpy as np
+from Evaluation import Evaluation
 
 # Load the dataset
 data_loader = DataLoader("wifi_db/noisy_dataset.txt")
 x, y = data_loader.load_data()
+evaluation=Evaluation()
 
 repeat_count = 5
-accuracy = 0
+accuracy1 = np.zeros(repeat_count)
+accuracy2 = np.zeros(repeat_count)
 for i in range(repeat_count):
 
     # Split the dataset
-    x_train, x_test, x_val, y_train, y_test, y_val = data_loader.split_dataset(x, y, 0.1, 0.1)
+    x_train, x_test, x_val, y_train, y_test, y_val = data_loader.split_dataset(x, y, 0.2, 0.2)
 
     # Train Decision Tree
     decision_tree = DecisionTreeClassifier()
     decision_tree.fit(x_train, y_train)
 
+
+    # Calculate the accuracy of the Decision Tree
+    accuracy1[i]=evaluation.evaluate(x_test,y_test,decision_tree)
+
+
     # Prune Decision Tree
     decision_tree.prune(x_train, y_train, x_val, y_val)
 
-    # Test Decision Tree
-    y_preds = decision_tree.predict(x_test)
+    # Calculate the accuracy of the pruned Decision Tree
+    accuracy2[i]=evaluation.evaluate(x_test,y_test,decision_tree)
 
-    # Calculate the accuracy of the Decision Tree
-    accuracy += np.count_nonzero(y_preds == y_test) / y_preds.shape[0]
+accuracy1 = sum(accuracy1)/repeat_count * 100
+accuracy1 = "{:.2f}".format(accuracy1)
+print(f"Before Pruning: Average accuracy of {accuracy1}% over {repeat_count} runs")
 
-accuracy = accuracy/repeat_count * 100
-accuracy = "{:.2f}".format(accuracy)
-print(f"Average accuracy of {accuracy}% over {repeat_count} runs")
+accuracy2 = sum(accuracy2)/repeat_count * 100
+accuracy2 = "{:.2f}".format(accuracy2)
+print(f"After Pruning: Average accuracy of {accuracy2}% over {repeat_count} runs")
+
+
+
+print('\n \n 10 FOLD CROSS VALIDATION METRICS BEFORE PRUNING:')
+confusion_matrix=evaluation.cross_validation(decision_tree,x,y,10)
+print('Confusion Matrix:')
+print(confusion_matrix)
+print('Accuracy:', evaluation.accuracy_from_confusion())
+print('Precision: ',evaluation.precision())
+print('Recall: ',evaluation.recall())
+
+print('\n\n 10 FOLD CROSS VALIDATION METRICS AFTER PRUNING:')
