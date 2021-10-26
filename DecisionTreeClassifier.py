@@ -11,7 +11,7 @@ class DecisionTreeClassifier:
 
     # Create the decision tree
     def fit(self, x, y):
-        self.root, self.depth = self.decision_tree_learning(x, y, 0)
+        self.root, self.depth = self.decision_tree_learning(x, y, 1)
 
     # Prune the created decision tree
     def prune(self, x_train, y_train, x_val, y_val):
@@ -22,6 +22,7 @@ class DecisionTreeClassifier:
         
         while self.prune_traverse(self.root, x_train, y_train, x_val, y_val): pass
 
+        self.depth = self.calc_depth(self.root)
         
     def prune_traverse(self, node, x_train, y_train, x_val, y_val):
         if node["leaf"]:
@@ -79,6 +80,16 @@ class DecisionTreeClassifier:
 
             return (self.prune_traverse(node["left"], x_train_l, y_train_l, x_val_l, y_val_l) or
                 self.prune_traverse(node["right"], x_train_r, y_train_r, x_val_r, y_val_r))
+    
+    # Calculate depth of the decision tree
+    def calc_depth(self, node):
+        if not node:
+            return 0
+        
+        l_depth = self.calc_depth(node["left"])
+        r_depth = self.calc_depth(node["right"])
+
+        return max(l_depth, r_depth) + 1
 
     # Make predictions for the sample by traversing the decision tree
     def predict(self, x):
