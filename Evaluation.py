@@ -177,35 +177,13 @@ class Evaluation:
 
             precision_array[i]= TP/(TP+FP)
 
-
         return precision_array
 
 
+    def F1(self):
 
+        precision=self.precision()
+        recall=self.recall()
 
+        return (2*precision*recall)/(precision+recall)
 
-
-
-
-            
-
-            
-
-
-    # Train the KNN (we'll use one nearest neighbour)
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
