@@ -153,8 +153,8 @@ class Evaluation:
         best_x_train=x[folds[best_val_id][0],:]
         best_y_train=y[folds[best_val_id][0]]
 
-        best_x_val=x[folds[best_val_id][0],:]
-        best_y_val=y[folds[best_val_id][0]]
+        best_x_val=x[folds[best_val_id][1],:]
+        best_y_val=y[folds[best_val_id][1]]
 
         tree.fit(best_x_train,best_y_train)
 
