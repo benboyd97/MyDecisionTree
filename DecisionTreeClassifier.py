@@ -37,8 +37,10 @@ class DecisionTreeClassifier:
             _, label_counts = np.unique(y_train, return_counts=True)
             majority_label = np.argmax(label_counts) + 1
 
+            pred_val = [node["left"]["value"] if i[node["attribute"]] <= node["value"] else node["right"]["value"] for i in x_val]
+
             if (self.validation_error(np.full(len(y_val), majority_label), y_val) < 
-                self.validation_error(self.predict(x_val), y_val)):
+                self.validation_error(np.array(pred_val), y_val)):
 
                 node["attribute"] = None
                 node["value"] = majority_label
