@@ -43,13 +43,46 @@ class Evaluation:
         return self.matrix
 
 
+
+    def pruned_cross_validation(self,tree,x,y,k):
+
+        rows,columns=np.shape(x)
+
+        split_ids=self.k_split(k,rows)
+
+
+        y_actual_array=np.array([])
+        y_pred_array=np.array([])
+        for i in range(k):
+
+            test_ids=split_ids[i]
+
+            new_split_ids=split_ids[:i]+split_ids[i+1:]
+
+
+            folds=self.find_folds(k-1,new_split_ids)
+
+
+            tree=self.cross_validate_tree(tree,x,y,k-1,folds)
+
+            
+            y_pred=tree.predict(x[test_ids,:])
+
+            y_pred_array=np.append(y_pred_array,y_pred)
+
+            y_actual_array=np.append(y_actual_array,y[test_ids])
+
+        
+        self.matrix=self.confusion_matrix(y_actual_array,y_pred_array)
+
+        return self.matrix
+            
+
     def k_split(self,k, rows, random_generator=default_rng()):
 
 
-        # generate rows-1 ids and shuffle them
         shuffled_ids = random_generator.permutation(rows)
 
-        # split the shuffled ids into k equal groups
         split_ids = np.array_split(shuffled_ids, k)
 
 
@@ -79,7 +112,6 @@ class Evaluation:
 
 
         for i, (train_ids, test_ids) in enumerate(folds):
-            # get the dataset from the correct splits
             x_train = x[train_ids, :]
             y_train = y[train_ids]
             x_test = x[test_ids, :]
@@ -96,32 +128,64 @@ class Evaluation:
         return y_actual,y_pred
 
 
-    def confusion_matrix(self,y_gold, y_prediction, class_labels=[1,2,3,4]):
+    def cross_validate_tree(self,tree,x,y,k,folds):
+        
+        
+        val_accuracy=np.zeros(k)
+        
+        for j, (train_ids, val_ids) in enumerate(folds):
+
+            x_train = x[train_ids, :]
+            y_train = y[train_ids]
+            x_val = x[val_ids, :]
+            y_val = y[val_ids]
+
+            tree.fit(x_train,y_train)
+
+            tree.prune(x_train, y_train, x_val, y_val)
+
+            val_accuracy[j]=self.evaluate(x_val,y_val,tree)
+
+        
+        
+        best_val_id=np.argmax(val_accuracy)
+
+        best_x_train=x[folds[best_val_id][0],:]
+        best_y_train=y[folds[best_val_id][0]]
+
+        best_x_val=x[folds[best_val_id][0],:]
+        best_y_val=y[folds[best_val_id][0]]
+
+        tree.fit(best_x_train,best_y_train)
+
+        tree.prune(best_x_train,best_y_train,best_x_val,best_y_val)
+
+        return tree
+        
+
+
+
+    def confusion_matrix(self,y_actual, y_pred, class_labels=[1,2,3,4]):
 
 
 
         confusion = np.zeros((len(class_labels), len(class_labels)), dtype=np.int)
 
         for (i, label) in enumerate(class_labels):
-        # get predictions where the ground truth is the current class label
-            indices = (y_gold == label)
-            gold = y_gold[indices]
-            predictions = y_prediction[indices]
 
-        # quick way to get the counts per label
-            (unique_labels, counts) = np.unique(predictions, return_counts=True)
+            indices = (y_actual == label)
+            pred = y_pred[indices]
 
-        # convert the counts to a dictionary
+            (unique_labels, counts) = np.unique(pred, return_counts=True)
+
             frequency_dict = dict(zip(unique_labels, counts))
 
-        # fill up the confusion matrix for the current row
             for (j, class_label) in enumerate(class_labels):
                 confusion[i, j] = frequency_dict.get(class_label, 0)
 
-
         
 
-        return confusion/len(y_gold)
+        return confusion/len(y_actual)
 
     
     def accuracy_from_confusion(self):
@@ -186,4 +250,3 @@ class Evaluation:
         recall=self.recall()
 
         return (2*precision*recall)/(precision+recall)
-

@@ -41,6 +41,8 @@ print(f"After Pruning: Average accuracy of {accuracy2}% over {repeat_count} runs
 
 
 
+decision_tree = DecisionTreeClassifier()
+
 print('\n \n 10 FOLD CROSS VALIDATION METRICS BEFORE PRUNING:')
 confusion_matrix=evaluation.cross_validation(decision_tree,x,y,10)
 print('Confusion Matrix:')
@@ -50,4 +52,14 @@ print('Precision: ',evaluation.precision())
 print('Recall: ',evaluation.recall())
 print('F1: ',evaluation.F1())
 
+decision_tree = DecisionTreeClassifier()
+
 print('\n\n 10 FOLD CROSS VALIDATION METRICS AFTER PRUNING:')
+confusion_matrix=evaluation.pruned_cross_validation(decision_tree,x,y,10)
+print('Confusion Matrix:')
+print(confusion_matrix)
+print('Accuracy: ', evaluation.accuracy_from_confusion())
+print('Precision: ',evaluation.precision())
+print('Recall: ',evaluation.recall())
+print('F1: ',evaluation.F1())
+
