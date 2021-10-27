@@ -4,7 +4,7 @@ import numpy as np
 from Evaluation import Evaluation
 
 # Load the dataset
-data_loader = DataLoader("wifi_db/clean_dataset.txt")
+data_loader = DataLoader("wifi_db/noisy_dataset.txt")
 x, y = data_loader.load_data()
 evaluation=Evaluation()
 
