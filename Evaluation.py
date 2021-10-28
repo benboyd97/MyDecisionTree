@@ -28,8 +28,6 @@ class Evaluation:
     def pruned_cross_validation(self, tree, x, y, k):
         rows, columns = np.shape(x)
         split_ids = self.k_split(k, rows)
-        y_actual_array = np.array([])
-        y_pred_array = np.array([])
         confusion = [[0]]
 
         for i in range(k):
@@ -38,15 +36,14 @@ class Evaluation:
             folds = self.find_folds(k-1, new_split_ids)
             tree = self.cross_validate_tree(tree, x, y, k-1, folds)
             y_pred = tree.predict(x[test_ids, :])
-            y_pred_array = np.append(y_pred_array, y_pred)
-            y_actual_array = np.append(y_actual_array, y[test_ids])
-            confusion += self.confusion_matrix(y_actual_array, y_pred_array)
+            y_test = y[test_ids]
+            confusion += self.confusion_matrix(y_test, y_pred)
 
         self.matrix = confusion / k
 
         return self.matrix
 
-    def k_split(self, k, rows, random_generator=default_rng()):
+    def k_split(self, k, rows, random_generator=default_rng(seed=10)):
         shuffled_ids = random_generator.permutation(rows)
         split_ids = np.array_split(shuffled_ids, k)
         return split_ids
@@ -62,19 +59,15 @@ class Evaluation:
 
     # TODO: maybe rename this to something like cross validation
     def train_test_folds(self, tree, x, y, folds):
-        y_pred = np.array([])
-        y_actual = np.array([])
         confusion = [[0]]
         for i, (train_ids, test_ids) in enumerate(folds):
             x_train = x[train_ids, :]
             y_train = y[train_ids]
             x_test = x[test_ids, :]
             y_test = y[test_ids]
-
             tree.fit(x_train, y_train)
-            y_pred = np.append(y_pred, tree.predict(x_test))
-            y_actual = np.append(y_actual, y_test)
-            confusion += self.confusion_matrix(y_actual, y_pred)
+            y_pred = tree.predict(x_test)
+            confusion += self.confusion_matrix(y_test,y_pred)
 
         return confusion / len(folds)
 
