@@ -184,7 +184,7 @@ class Evaluation:
                 confusion[i, j] = frequency_dict.get(class_label, 0)
 
         
-
+        self.matrix=confusion/len(y_actual)
         return confusion/len(y_actual)
 
     
