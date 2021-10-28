@@ -43,7 +43,7 @@ class Evaluation:
 
         return self.matrix
 
-    def k_split(self, k, rows, random_generator=default_rng(seed=10)):
+    def k_split(self, k, rows, random_generator=default_rng()):
         shuffled_ids = random_generator.permutation(rows)
         split_ids = np.array_split(shuffled_ids, k)
         return split_ids
