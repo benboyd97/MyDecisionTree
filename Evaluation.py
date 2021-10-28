@@ -75,8 +75,10 @@ class Evaluation:
 
         return confusion / len(folds)
 
-    #inner loop of nested cross validation used to find k-1 best models
     def cross_validation_hyperparam_tuning(self, tree, x, y, k, folds):
+        """
+        inner loop of nested cross validation used to find k-1 best models
+        """
         val_accuracy = np.zeros(k)
         for j, (train_ids, val_ids) in enumerate(folds):
             x_train = x[train_ids, :]
