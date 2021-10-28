@@ -34,8 +34,11 @@ class DecisionTreeClassifier:
             if len(y_val) == 0:
                 return False
 
-            _, label_counts = np.unique(y_train, return_counts=True)
-            majority_label = np.argmax(label_counts) + 1
+            sorted_y, label_counts = np.unique(y_train, return_counts=True)
+
+            majority_id=np.argmax(label_counts)
+
+            majority_label=sorted_y[majority_id]
 
             pred_val = [node["left"]["value"] if i[node["attribute"]] <= node["value"] else node["right"]["value"] for i in x_val]
 

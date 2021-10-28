@@ -112,6 +112,11 @@ class Evaluation:
 
         return confusion
 
+        
+
+        return confusion/len(y_actual)
+
+    
     def accuracy_from_confusion(self):
         confusion = self.matrix
         if np.sum(confusion) > 0:
