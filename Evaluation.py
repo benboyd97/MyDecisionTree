@@ -111,11 +111,6 @@ class Evaluation:
                     confusion[int(label)-1, int(pred)-1] += 1
 
         return confusion
-
-        
-
-        return confusion/len(y_actual)
-
     
     def accuracy_from_confusion(self):
         confusion = self.matrix
