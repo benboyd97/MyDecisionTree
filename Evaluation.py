@@ -29,6 +29,7 @@ class Evaluation:
         split_ids = self.k_split(k, rows)
         y_actual_array = np.array([])
         y_pred_array = np.array([])
+        confusion = [[0]]
 
         for i in range(k):
             test_ids = split_ids[i]
@@ -38,8 +39,9 @@ class Evaluation:
             y_pred = tree.predict(x[test_ids, :])
             y_pred_array = np.append(y_pred_array, y_pred)
             y_actual_array = np.append(y_actual_array, y[test_ids])
+            confusion += self.confusion_matrix(y_actual_array, y_pred_array)
 
-        self.matrix = self.confusion_matrix(y_actual_array, y_pred_array)
+        self.matrix = self.confusion_matrix(y_actual_array, y_pred_array) / k
 
         return self.matrix
 
