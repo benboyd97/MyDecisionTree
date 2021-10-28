@@ -12,20 +12,21 @@ class Evaluation:
         # return accuracy
         return np.count_nonzero(y_preds == y_test) / y_test.shape[0]
 
+        #calculate error based on the number of wrongly classified rooms
     def validation_error(self, y_preds, y_test):
         return np.count_nonzero(y_preds != y_test) / y_test.shape[0]
 
-    # TODO: maybe rename this to something like unnested cross validation
-    def cross_validation(self, tree, x, y, k):
+        #regular cross validation used for tests with no validation set
+    def unnested_cross_validation(self, tree, x, y, k):
         rows, columns = np.shape(x)
         split_ids = self.k_split(k, rows)
         folds = self.find_folds(k, split_ids)
-        self.matrix = self.train_test_folds(tree, x, y, folds)
+        self.matrix = self.cross_validation(tree, x, y, folds)
 
         return self.matrix
 
-    # what do we need this for?
-    def pruned_cross_validation(self, tree, x, y, k):
+    #contains the outer loop for nested cross-validation by averaging the 10 best confusion matrices
+    def nested_cross_validation(self, tree, x, y, k):
         rows, columns = np.shape(x)
         split_ids = self.k_split(k, rows)
         confusion = [[0]]
@@ -34,7 +35,7 @@ class Evaluation:
             test_ids = split_ids[i]
             new_split_ids = split_ids[:i] + split_ids[i + 1:]
             folds = self.find_folds(k-1, new_split_ids)
-            tree = self.cross_validate_tree(tree, x, y, k-1, folds)
+            tree = self.cross_validation_hyperparam_tuning(tree, x, y, k-1, folds)
             y_pred = tree.predict(x[test_ids, :])
             y_test = y[test_ids]
             confusion += self.confusion_matrix(y_test, y_pred)
@@ -43,11 +44,13 @@ class Evaluation:
 
         return self.matrix
 
+    #split data ids into k evenly sized chunks 
     def k_split(self, k, rows, random_generator=default_rng()):
         shuffled_ids = random_generator.permutation(rows)
         split_ids = np.array_split(shuffled_ids, k)
         return split_ids
 
+    #stores every permutation of having one chunk test set and k-1 chunks of training set
     def find_folds(self, k, split_ids):
         folds = []
         for i in range(k):
@@ -57,8 +60,9 @@ class Evaluation:
 
         return folds
 
-    # TODO: maybe rename this to something like cross validation
-    def train_test_folds(self, tree, x, y, folds):
+
+    #trains the model on k different folds and finds average confusion matrix
+    def cross_validation(self, tree, x, y, folds):
         confusion = [[0]]
         for i, (train_ids, test_ids) in enumerate(folds):
             x_train = x[train_ids, :]
@@ -71,8 +75,8 @@ class Evaluation:
 
         return confusion / len(folds)
 
-    # TODO: maybe call this cross validation with pruning
-    def cross_validate_tree(self, tree, x, y, k, folds):
+    #inner loop of nested cross validation used to find k-1 best models
+    def cross_validation_hyperparam_tuning(self, tree, x, y, k, folds):
         val_accuracy = np.zeros(k)
         for j, (train_ids, val_ids) in enumerate(folds):
             x_train = x[train_ids, :]
@@ -97,6 +101,7 @@ class Evaluation:
 
         return tree
 
+    #finds the confusion matrix
     def confusion_matrix(self, y_actual, y_pred, class_labels=None):
         if class_labels is None:
             class_labels = np.unique(np.concatenate((y_pred, y_actual)))
@@ -109,7 +114,8 @@ class Evaluation:
                     confusion[int(label)-1, int(pred)-1] += 1
 
         return confusion
-    
+
+    #finds accuracy directly from confusion matrix    
     def accuracy_from_confusion(self):
         confusion = self.matrix
         if np.sum(confusion) > 0:
@@ -117,14 +123,18 @@ class Evaluation:
         else:
             return 0.
 
+
+    #finds recall for each class directly from confusion matrix
     def recall(self):
         confusion = self.matrix
         return np.diagonal(confusion) / np.sum(confusion, axis=1)
 
+    #finds precision for each class directly from confusion matrix
     def precision(self):
         confusion = self.matrix
         return np.diagonal(confusion) / np.sum(confusion, axis=0)
 
+    #finds F1 for each class using precision and recall
     def F1(self):
         precision = self.precision()
         recall = self.recall()
