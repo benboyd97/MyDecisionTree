@@ -15,6 +15,7 @@ class Evaluation:
     def validation_error(self, y_preds, y_test):
         return np.count_nonzero(y_preds != y_test) / y_test.shape[0]
 
+    # TODO: maybe rename this to something like unnested cross validation
     def cross_validation(self, tree, x, y, k):
         rows, columns = np.shape(x)
         split_ids = self.k_split(k, rows)
@@ -41,7 +42,7 @@ class Evaluation:
             y_actual_array = np.append(y_actual_array, y[test_ids])
             confusion += self.confusion_matrix(y_actual_array, y_pred_array)
 
-        self.matrix = self.confusion_matrix(y_actual_array, y_pred_array) / k
+        self.matrix = confusion / k
 
         return self.matrix
 
@@ -59,6 +60,7 @@ class Evaluation:
 
         return folds
 
+    # TODO: maybe rename this to something like cross validation
     def train_test_folds(self, tree, x, y, folds):
         y_pred = np.array([])
         y_actual = np.array([])
@@ -76,6 +78,7 @@ class Evaluation:
 
         return confusion / len(folds)
 
+    # TODO: maybe call this cross validation with pruning
     def cross_validate_tree(self, tree, x, y, k, folds):
         val_accuracy = np.zeros(k)
         for j, (train_ids, val_ids) in enumerate(folds):

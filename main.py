@@ -15,6 +15,7 @@ data_loader = DataLoader("wifi_db/" + args.data + "_dataset.txt") # TODO: we hav
 x, y = data_loader.load_data()
 evaluation = Evaluation()
 
+# TODO: maybe remove this since we have CV now?
 repeat_count = 5
 accuracy1 = np.zeros(repeat_count)
 max_depth1 = np.zeros(repeat_count)
