@@ -1,12 +1,13 @@
 from DecisionTreeClassifier import DecisionTreeClassifier
 from DataLoader import DataLoader
+import graph
 import numpy as np
 
 # Load the dataset
 data_loader = DataLoader("wifi_db/clean_dataset.txt")
 x, y = data_loader.load_data()
 
-repeat_count = 5
+repeat_count = 1
 accuracy = 0
 for i in range(repeat_count):
 
@@ -22,6 +23,7 @@ for i in range(repeat_count):
 
     # Calculate the accuracy of the Decision Tree
     accuracy += np.count_nonzero(y_preds == y_test) / y_preds.shape[0]
+    graph.plot(decision_tree)
 
 accuracy = accuracy/repeat_count * 100
 accuracy = "{:.2f}".format(accuracy)
