@@ -1,24 +1,28 @@
 from DecisionTreeClassifier import DecisionTreeClassifier
 from DataLoader import DataLoader
-import json
+import numpy as np
 
-# Load and split dataset
+# Load the dataset
 data_loader = DataLoader("wifi_db/clean_dataset.txt")
 x, y = data_loader.load_data()
-x_train, x_test, y_train, y_test = data_loader.split_dataset(x, y, 0.2)
 
-# Train Decision Tree
-decision_tree = DecisionTreeClassifier()
-decision_tree.fit(x_train, y_train)
+repeat_count = 5
+accuracy = 0
+for i in range(repeat_count):
 
-#print(json.dumps(decision_tree.root, indent=4))
+    # Split the dataset
+    x_train, x_test, y_train, y_test = data_loader.split_dataset(x, y, 0.2)
 
-# Test Decision Tree
-y_preds = decision_tree.predict(x_test)
+    # Train Decision Tree
+    decision_tree = DecisionTreeClassifier()
+    decision_tree.fit(x_train, y_train)
 
-correct = 0
-for i in range(len(y_preds)):
-    if y_preds[i] == y_test[i]:
-        correct += 1
+    # Test Decision Tree
+    y_preds = decision_tree.predict(x_test)
 
-print(correct/len(y_preds))
+    # Calculate the accuracy of the Decision Tree
+    accuracy += np.count_nonzero(y_preds == y_test) / y_preds.shape[0]
+
+accuracy = accuracy/repeat_count * 100
+accuracy = "{:.2f}".format(accuracy)
+print(f"Average accuracy of {accuracy}% over {repeat_count} runs")
