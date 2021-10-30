@@ -1,51 +1,63 @@
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from matplotlib import colors as mcolors
-from numpy.core.fromnumeric import _all_dispatcher
-
-# Parameters defining shape of the graph
-width_dist = 50
-depth_dist = 10
+import math
 
 
 def plot(decision_tree):
+
     root = decision_tree.root
     depth = decision_tree.depth
+
+    # In a complete binary tree, the width of the tree is determined by the final level.
+    # This will be the max width our tree could ever be
+    slots_per_level = 2**depth - 1
+    mid_slot = math.floor(slots_per_level/2)
+    # TODO utilise the min_separation to prevent node labels from overlapping
+    min_separation = 10
+
+    max_width = (slots_per_level * 2) / 2
+    depth_step = 10
 
     segments = []
     labels = []
 
     # Draws each level of the binary tree
-    def bintree_level(node, x, y, width):
+    def bintree_level(node, x, y, slot, depth):
 
-        text = f"Room {node['value']}" if node["leaf"] else f"X{node['attribute']} < {node['value']}"
+        # The label for the current node
+        text = f"Room: {node['value']}" if node["leaf"] else f"X{node['attribute']} < {node['value']}"
         labels.append((text, x, y))
 
+        gap = 2**depth
         if node["left"]:
-            xl = x - width
-            yl = y - depth_dist
+            new_slot = slot - gap
+            xl = (new_slot - mid_slot)/slots_per_level * max_width
+            yl = y - depth_step
             segments.append([[x, y], [xl, yl]])
-            bintree_level(node["left"], xl, yl, width/2)
+            bintree_level(node["left"], xl, yl, new_slot, depth-1)
         if node["right"]: 
-            xr = x + width
-            yr = y - depth_dist
+            new_slot = slot + gap
+            xr = (new_slot - mid_slot)/slots_per_level * max_width
+            yr = y - depth_step
             segments.append([[x, y], [xr, yr]])
-            bintree_level(node["right"], xr, yr, width/2)
+            bintree_level(node["right"], xr, yr, new_slot, depth-1)
 
 
-    bintree_level(root, 0, 0, width_dist)
-
+    bintree_level(root, 0, 0, mid_slot, depth)
     colors = [mcolors.to_rgba(c)
             for c in plt.rcParams['axes.prop_cycle'].by_key()['color']]
     line_segments = LineCollection(segments, linewidths=1, colors=colors, linestyle='solid')
 
     # Draws the graph
     fig, ax = plt.subplots()
-    ax.set_ylim(-(depth * depth_dist + 1), 1)
-    ax.set_xlim(-2*width_dist, 2*width_dist)
+    ax.set_ylim(-(depth * depth_step + 1), 5)
+    ax.set_xlim(-2*max_width, 2*max_width)
     ax.add_collection(line_segments)
+    ax.axes.xaxis.set_visible(False)
+    ax.axes.yaxis.set_visible(False)
 
     for txt,x,y in labels:
-        ax.annotate(txt,(x,y))
+        ax.annotate(txt,(x,y), bbox=dict(boxstyle='square',fc='blue', alpha=0.5), ha='center', va='center')
     
     plt.show()
