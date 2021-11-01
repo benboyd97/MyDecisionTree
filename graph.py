@@ -3,11 +3,11 @@ from matplotlib.collections import LineCollection
 from matplotlib import colors as mcolors
 import math
 
+DEPTH_STEP = 5
 
-def plot(decision_tree):
-
-    root = decision_tree.root
-    depth = decision_tree.depth
+def graph_tree(tree):
+    root = tree.root
+    depth = tree.depth
 
     # In a complete binary tree, the width of the tree is determined by the final level.
     # This will be the max width our tree could ever be
@@ -17,8 +17,7 @@ def plot(decision_tree):
     min_separation = 10
 
     max_width = (slots_per_level * 2) / 2
-    depth_step = 5
-
+    
     segments = []
     labels = []
 
@@ -39,32 +38,48 @@ def plot(decision_tree):
         if node["left"]:
             new_slot = slot - gap
             xl = (new_slot - mid_slot)/slots_per_level * max_width
-            yl = y - depth_step
+            yl = y - DEPTH_STEP
             segments.append([[x, y], [xl, yl]])
             bintree_level(node["left"], xl, yl, new_slot, depth-1)
         if node["right"]: 
             new_slot = slot + gap
             xr = (new_slot - mid_slot)/slots_per_level * max_width
-            yr = y - depth_step
+            yr = y - DEPTH_STEP
             segments.append([[x, y], [xr, yr]])
             bintree_level(node["right"], xr, yr, new_slot, depth-1)
-
-
+    
     bintree_level(root, 0, 0, mid_slot, depth)
     colors = [mcolors.to_rgba(c)
             for c in plt.rcParams['axes.prop_cycle'].by_key()['color']]
     line_segments = LineCollection(segments, linewidths=1, colors=colors, linestyle='solid')
 
-    # Draws the graph
-    fig, ax = plt.subplots()
-    ax.set_ylim(-(depth * depth_step + 5), 5)
-    ax.set_xlim(-2.1*max_width, 2.1*max_width)
-    ax.add_collection(line_segments)
-    ax.axes.xaxis.set_visible(False)
-    ax.axes.yaxis.set_visible(False)
+    return line_segments, labels, depth, max_width
 
-    for txt,x,y, color in labels:
-        ax.annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
 
-    fig.savefig('tree.svg', format='svg')
+def plot(tree, pruned_tree):
+
+    tree_lines, tree_labels, tree_depth, tree_width = graph_tree(tree)
+    prune_lines, prune_labels, prune_depth, prune_width = graph_tree(pruned_tree)
+    depth = max(tree_depth, prune_depth)
+    width = max(tree_width, prune_width)
+
+    # Draws the graphs for both decision trees
+    fig, axs = plt.subplots(1,2)
+    axs[0].set_title("Decision Tree")
+    axs[0].add_collection(tree_lines)
+    for txt,x,y, color in tree_labels:
+        axs[0].annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
+
+    axs[1].set_title("Pruned Decision Tree")
+    axs[1].add_collection(prune_lines)
+    for txt,x,y, color in prune_labels:
+        axs[1].annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
+
+    for ax in axs.flat:
+        ax.set_ylim(-(depth * DEPTH_STEP + 5), 5)
+        ax.set_xlim(-2.1*width, 2.1*width)
+        ax.axes.xaxis.set_visible(False)
+        ax.axes.yaxis.set_visible(False)
+
+    fig.savefig('decision_trees.svg', format='svg')
     plt.show()
