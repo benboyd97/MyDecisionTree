@@ -4,6 +4,7 @@ import graph
 import numpy as np
 from Evaluation import Evaluation
 import argparse
+import copy
 
 parser = argparse.ArgumentParser(description="Decision tree classifier for the Introduction to Machine Learning Coursework 1")
 parser.add_argument('--data', type=str, help="Data to classify (e.g. 'clean', 'noisy') ", default="noisy")
@@ -17,7 +18,7 @@ x, y = data_loader.load_data()
 evaluation = Evaluation()
 
 # TODO: maybe remove this since we have CV now?
-repeat_count = 5
+repeat_count = 1
 accuracy1 = np.zeros(repeat_count)
 max_depth1 = np.zeros(repeat_count)
 accuracy2 = np.zeros(repeat_count)
@@ -34,16 +35,17 @@ for i in range(repeat_count):
     accuracy1[i] = evaluation.evaluate(x_test, y_test, decision_tree)
     max_depth1[i] = decision_tree.depth
 
-    graph.plot(decision_tree)
 
     # Prune Decision Tree
-    decision_tree.prune(x_train, y_train, x_val, y_val)
+    # TODO Maybe change the prune function to return another decision tree so we dont have to copy the base tree to be able to graph it
+    pruned_tree = copy.deepcopy(decision_tree)
+    pruned_tree.prune(x_train, y_train, x_val, y_val)
 
     # Calculate the accuracy of the pruned Decision Tree
     accuracy2[i] = evaluation.evaluate(x_test, y_test, decision_tree)
     max_depth2[i] = decision_tree.depth
 
-    graph.plot(decision_tree)
+    graph.plot(decision_tree, pruned_tree)
 
 accuracy1 = sum(accuracy1) / repeat_count * 100
 accuracy1 = "{:.2f}".format(accuracy1)
@@ -71,7 +73,6 @@ print('Recall: ', evaluation.recall())
 print('F1: ', evaluation.F1())
 
 decision_tree = DecisionTreeClassifier()
-graph.plot(decision_tree)
 
 print('\n\n 10 FOLD CROSS VALIDATION METRICS AFTER PRUNING:')
 confusion_matrix = evaluation.nested_cross_validation(decision_tree, x, y, 10)
