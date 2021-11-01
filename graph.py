@@ -5,7 +5,7 @@ import math
 
 DEPTH_STEP = 5
 
-def graph_tree(tree):
+def graph_tree(tree, ax, title):
     root = tree.root
     depth = tree.depth
 
@@ -53,28 +53,25 @@ def graph_tree(tree):
             for c in plt.rcParams['axes.prop_cycle'].by_key()['color']]
     line_segments = LineCollection(segments, linewidths=1, colors=colors, linestyle='solid')
 
-    return line_segments, labels, depth, max_width
+    # Draw the graph for the decision tree
+    ax.set_title(title)
+    ax.add_collection(line_segments)
+    for txt,x,y, color in labels:
+        ax.annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
+
+    return depth, max_width
 
 
 def plot(tree, pruned_tree):
 
-    tree_lines, tree_labels, tree_depth, tree_width = graph_tree(tree)
-    prune_lines, prune_labels, prune_depth, prune_width = graph_tree(pruned_tree)
+    # Graph both decision trees
+    fig, axs = plt.subplots(1,2)
+    tree_depth, tree_width = graph_tree(tree, axs[0], "Decision Tree")
+    prune_depth, prune_width = graph_tree(pruned_tree, axs[1], "Pruned Decision Tree")
     depth = max(tree_depth, prune_depth)
     width = max(tree_width, prune_width)
 
-    # Draws the graphs for both decision trees
-    fig, axs = plt.subplots(1,2)
-    axs[0].set_title("Decision Tree")
-    axs[0].add_collection(tree_lines)
-    for txt,x,y, color in tree_labels:
-        axs[0].annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
-
-    axs[1].set_title("Pruned Decision Tree")
-    axs[1].add_collection(prune_lines)
-    for txt,x,y, color in prune_labels:
-        axs[1].annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
-
+    # Modify graph visuals
     for ax in axs.flat:
         ax.set_ylim(-(depth * DEPTH_STEP + 5), 5)
         ax.set_xlim(-2.1*width, 2.1*width)
