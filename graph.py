@@ -65,5 +65,6 @@ def plot(decision_tree):
 
     for txt,x,y, color in labels:
         ax.annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
-    
+
+    fig.savefig('tree.svg', format='svg')
     plt.show()
