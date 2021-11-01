@@ -17,7 +17,7 @@ def plot(decision_tree):
     min_separation = 10
 
     max_width = (slots_per_level * 2) / 2
-    depth_step = 10
+    depth_step = 5
 
     segments = []
     labels = []
@@ -26,9 +26,15 @@ def plot(decision_tree):
     def bintree_level(node, x, y, slot, depth):
 
         # The label for the current node
-        text = f"Room: {node['value']}" if node["leaf"] else f"X{node['attribute']} < {node['value']}"
-        labels.append((text, x, y))
+        if node["leaf"]:
+            text = f"Room: {node['value']}"
+            color = "green"
+        else:
+            text = f"X{node['attribute']} < {node['value']}"
+            color = "blue"
+        labels.append((text, x, y, color))
 
+        # Draw the left and right child
         gap = 2**depth
         if node["left"]:
             new_slot = slot - gap
@@ -51,13 +57,13 @@ def plot(decision_tree):
 
     # Draws the graph
     fig, ax = plt.subplots()
-    ax.set_ylim(-(depth * depth_step + 1), 5)
-    ax.set_xlim(-2*max_width, 2*max_width)
+    ax.set_ylim(-(depth * depth_step + 5), 5)
+    ax.set_xlim(-2.1*max_width, 2.1*max_width)
     ax.add_collection(line_segments)
     ax.axes.xaxis.set_visible(False)
     ax.axes.yaxis.set_visible(False)
 
-    for txt,x,y in labels:
-        ax.annotate(txt,(x,y), bbox=dict(boxstyle='square',fc='blue', alpha=0.5), ha='center', va='center')
+    for txt,x,y, color in labels:
+        ax.annotate(txt,(x,y), bbox=dict(boxstyle='square',fc=color, alpha=0.5), ha='center', va='center', fontsize=8)
     
     plt.show()
