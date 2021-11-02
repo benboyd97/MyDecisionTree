@@ -38,7 +38,7 @@ for i in range(repeat_count):
 
 
     # Prune Decision Tree
-    # TODO Maybe change the prune function to return another decision tree so we dont have to copy the base tree to be able to graph it
+    # TODO: Maybe change the prune function to return another decision tree so we dont have to copy the base tree to be able to graph it
     pruned_tree = copy.deepcopy(decision_tree)
     pruned_tree.prune(x_train, y_train, x_val, y_val)
 
