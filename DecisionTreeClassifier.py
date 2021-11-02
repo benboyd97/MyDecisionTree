@@ -7,7 +7,7 @@ class DecisionTreeClassifier:
         self.root = None
         self.depth = 0
         evaluation = Evaluation()
-        # self.validation_error = evaluation.validation_error # TODO: can this go?
+        self.validation_error = evaluation.validation_error
 
     # Create the decision tree
     def fit(self, x, y):

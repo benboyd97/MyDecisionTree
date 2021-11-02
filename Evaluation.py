@@ -23,9 +23,9 @@ class Evaluation:
         # return accuracy
         return np.count_nonzero(y_preds == y_test) / y_test.shape[0]
 
-    # TODO: can this go?
-    #def validation_error(self, y_preds, y_test):
-    #    return np.count_nonzero(y_preds != y_test) / y_test.shape[0]
+    #validation error used in pruning
+    def validation_error(self, y_preds, y_test):
+        return np.count_nonzero(y_preds != y_test) / y_test.shape[0]
 
     # trains the model on k different folds and finds average confusion matrix
     def cross_validation(self, tree, x, y, k):
