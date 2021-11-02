@@ -8,9 +8,10 @@ import copy
 
 parser = argparse.ArgumentParser(description="Decision tree classifier for the Introduction to Machine Learning Coursework 1")
 parser.add_argument('--data', type=str, help="Data to classify (e.g. 'clean', 'noisy') ", default="noisy")
+parser.add_argument('--k', type=int, help="k for cross-validation (e.g. 10) ", default=10, choices=range(1, 100))
 args = parser.parse_args()
 
-print(f"Working on {args.data} data")
+print(f"Working on {args.data} data, using {args.k} folds")
 
 # Load the dataset
 data_loader = DataLoader("wifi_db/" + args.data + "_dataset.txt") # TODO: we have to be careful here, as far as I know the forward slash does not work on Windows?
