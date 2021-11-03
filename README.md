@@ -6,7 +6,7 @@ The work was done by Cornelius Braun, Ben Boyd, Shayaan and Ryan.
 
 ## How to use
 1. `git clone git@gitlab.doc.ic.ac.uk:iml/decision-tree.git`
-2. `main.py --dataset path_to_dataset` to run the classifier (with and without pruning) on the specified data set and a 10-fold cross-validation.
+2. `main.py --dataset path_to_dataset` to run the classifier (with and without pruning) on the specified data set and a 10-fold cross-validation. If you do not specify a dataset, i.e. you run `main.py`, the classifier will be trained and evaluated on the clean dataset in `wifi_db/`.
 
 
 You can alternatively set the number of folds for cross-validation using\

@@ -7,11 +7,11 @@ import argparse
 import copy
 
 parser = argparse.ArgumentParser(description="Decision tree classifier for the Introduction to Machine Learning Coursework 1")
-parser.add_argument('--dataset', type=str, help="Path to dataset", required=True)
+parser.add_argument('--dataset', type=str, help="Path to dataset", default="wifi_db/clean_dataset.txt")
 parser.add_argument('--k', type=int, help="k for cross-validation (e.g. 10) ", default=10, choices=range(1, 100))
 args = parser.parse_args()
 
-print(f"Working on {args.dataset}, using {args.k} folds")
+print(f"Working on data in {args.dataset}, using {args.k} folds")
 
 # Load the dataset
 data_loader = DataLoader(args.dataset)
