@@ -18,45 +18,21 @@ data_loader = DataLoader(args.dataset)
 x, y = data_loader.load_data()
 evaluation = Evaluation()
 
-# TODO: maybe remove this since we have CV now?
-repeat_count = 1
-accuracy1 = np.zeros(repeat_count)
-max_depth1 = np.zeros(repeat_count)
-accuracy2 = np.zeros(repeat_count)
-max_depth2 = np.zeros(repeat_count)
-for i in range(repeat_count):
-    # Split the dataset
-    x_train, x_test, x_val, y_train, y_test, y_val = data_loader.split_dataset(x, y, 0.1, 0.1)
+base_accuracy = base_depth = prune_accuracy = prune_depth = 0
 
-    # Train Decision Tree
-    decision_tree = DecisionTreeClassifier()
-    decision_tree.fit(x_train, y_train)
+# Split the dataset
+x_train, x_test, x_val, y_train, y_test, y_val = data_loader.split_dataset(x, y, 0.1, 0.1)
 
-    # Calculate the accuracy of the Decision Tree
-    accuracy1[i] = evaluation.evaluate(x_test, y_test, decision_tree)
-    max_depth1[i] = decision_tree.depth
+# Train Decision Tree
+decision_tree = DecisionTreeClassifier()
+decision_tree.fit(x_train, y_train)
 
+# Prune Decision Tree
+# TODO: Maybe change the prune function to return another decision tree so we dont have to copy the base tree to be able to graph it
+pruned_tree = copy.deepcopy(decision_tree)
+pruned_tree.prune(x_train, y_train, x_val, y_val)
 
-    # Prune Decision Tree
-    # TODO: Maybe change the prune function to return another decision tree so we dont have to copy the base tree to be able to graph it
-    pruned_tree = copy.deepcopy(decision_tree)
-    pruned_tree.prune(x_train, y_train, x_val, y_val)
-
-    # Calculate the accuracy of the pruned Decision Tree
-    accuracy2[i] = evaluation.evaluate(x_test, y_test, decision_tree)
-    max_depth2[i] = decision_tree.depth
-
-    graph.plot(decision_tree, pruned_tree)
-
-accuracy1 = sum(accuracy1) / repeat_count * 100
-accuracy1 = "{:.2f}".format(accuracy1)
-print(f"Before Pruning: Average accuracy of {accuracy1}% over {repeat_count} runs")
-print('Average max depth', np.average(max_depth1))
-
-accuracy2 = sum(accuracy2) / repeat_count * 100
-accuracy2 = "{:.2f}".format(accuracy2)
-print(f"After Pruning: Average accuracy of {accuracy2}% over {repeat_count} runs")
-print('Average max depth', np.average(max_depth2))
+graph.plot(decision_tree, pruned_tree)
 
 decision_tree = DecisionTreeClassifier()
 evaluation = Evaluation()
@@ -64,8 +40,8 @@ evaluation = Evaluation()
 # make sure we just print two decimals
 np.set_printoptions(precision=2)
 
-print('\n \n 10 FOLD CROSS VALIDATION METRICS BEFORE PRUNING:')
-confusion_matrix = evaluation.cross_validation(decision_tree, x, y, 10)
+print(f'\n \n {args.k} FOLD CROSS VALIDATION METRICS BEFORE PRUNING:')
+confusion_matrix = evaluation.cross_validation(decision_tree, x, y, args.k)
 print('Confusion Matrix:')
 print(confusion_matrix)
 print(f'Accuracy: {evaluation.accuracy_from_confusion():.2f}')
@@ -77,8 +53,8 @@ print(f'Average Max Depth: {evaluation.average_max_depth():.2f}')
 decision_tree = DecisionTreeClassifier()
 evaluation = Evaluation()
 
-print('\n\n 10 FOLD CROSS VALIDATION METRICS AFTER PRUNING:')
-confusion_matrix = evaluation.nested_cross_validation(decision_tree, x, y, 10)
+print(f'\n\n {args.k} FOLD CROSS VALIDATION METRICS AFTER PRUNING:')
+confusion_matrix = evaluation.nested_cross_validation(decision_tree, x, y, args.k)
 print('Confusion Matrix:')
 print(confusion_matrix)
 print(f'Accuracy: {evaluation.accuracy_from_confusion():.2f}')
