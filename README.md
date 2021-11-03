@@ -13,4 +13,4 @@ You can alternatively set the number of folds for cross-validation using\
 `main.py --k [1,..,20]`
 
 ## Supplementary material
-The project report can be found [here](link TBD). This report includes all main classifier metrics such as *precision*, *recall* and *F1*. Furthermore, we compare the performance of pruned and unpruned decision trees.
+The project report can be found [here](assignment.pdf). This report includes all main classifier metrics such as *precision*, *recall* and *F1*. Furthermore, we compare the performance of pruned and unpruned decision trees.
