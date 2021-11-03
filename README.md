@@ -6,11 +6,11 @@ The work was done by Cornelius Braun, Ben Boyd, Shayaan and Ryan.
 
 ## How to use
 1. `git clone git@gitlab.doc.ic.ac.uk:iml/decision-tree.git`
-2. `main.py` to run the classifier (with and without pruning) on the noisy data set and a 10-fold cross-validation.
+2. `main.py --dataset path_to_dataset` to run the classifier (with and without pruning) on the specified data set and a 10-fold cross-validation.
 
 
-You can alternatively set the dataset and the number of folds for cross-validation using\
-`main.py --data ["clean", "noisy"] --k [1,..,20]`
+You can alternatively set the number of folds for cross-validation using\
+`main.py --k [1,..,20]`
 
 ## Supplementary material
 The project report can be found [here](link TBD). This report includes all main classifier metrics such as *precision*, *recall* and *F1*. Furthermore, we compare the performance of pruned and unpruned decision trees.
