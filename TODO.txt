@@ -1,7 +1,0 @@
-TODO:
-
-- pruning (Ryan)
-- README + report + add interface to specify split ratio and k for validation maybe (Cornelius)
-- refactoring + visualisation (Shayaan)
-- evaluation (Ben)
-- 
