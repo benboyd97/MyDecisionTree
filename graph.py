@@ -14,8 +14,6 @@ def graph_tree(tree, ax, title):
     # This will be the max width our tree could ever be
     slots_per_level = 2 ** depth - 1
     mid_slot = math.floor(slots_per_level / 2)
-    # TODO utilise the min_separation to prevent node labels from overlapping
-    min_separation = 10
 
     max_width = (slots_per_level * 2) / 2
 
